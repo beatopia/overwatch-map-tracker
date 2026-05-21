@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: overwatch_tracker_db
+    environment:
+      POSTGRES_DB: overwatch_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - overwatch_pg_data:/var/lib/postgresql/data
+
+volumes:
+  overwatch_pg_data:

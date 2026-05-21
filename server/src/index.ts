@@ -2,6 +2,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { pool } from "./db/pool";
+import heroesRouter from "./routes/heroes";
+import mapsRouter from "./routes/maps";
 
 dotenv.config();
 
@@ -10,6 +12,9 @@ const port = Number(process.env.PORT) || 4000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/maps", mapsRouter);
+app.use("/api/heroes", heroesRouter);
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
