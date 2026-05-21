@@ -4,6 +4,7 @@ import express from "express";
 import { pool } from "./db/pool";
 import heroesRouter from "./routes/heroes";
 import mapsRouter from "./routes/maps";
+import matchesRouter from "./routes/matches";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/maps", mapsRouter);
 app.use("/api/heroes", heroesRouter);
+app.use("/api/matches", matchesRouter);
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
