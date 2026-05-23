@@ -27,6 +27,57 @@ function toOptionalText(value: unknown): string | null {
   return typeof value === "string" ? value : null;
 }
 
+router.get("/", async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+         m.id,
+         mp.name AS map_name,
+         mp.mode AS map_mode,
+         m.result,
+         m.match_format AS match_format,
+         m.season,
+         m.played_at AS played_at,
+         m.notes,
+         m.created_at AS created_at,
+         COALESCE(
+           json_agg(
+             json_build_object(
+               'id', h.id,
+               'name', h.name,
+               'role', h.role,
+               'hero_order', mh.hero_order
+             )
+             ORDER BY mh.hero_order
+           ) FILTER (WHERE mh.id IS NOT NULL),
+           '[]'::json
+         ) AS heroes
+       FROM matches m
+       INNER JOIN maps mp ON mp.id = m.map_id
+       LEFT JOIN match_heroes mh
+         ON mh.match_id = m.id
+        AND mh.hero_group = 'player'
+       LEFT JOIN heroes h ON h.id = mh.hero_id
+       GROUP BY
+         m.id,
+         mp.name,
+         mp.mode,
+         m.result,
+         m.match_format,
+         m.season,
+         m.played_at,
+         m.notes,
+         m.created_at
+       ORDER BY m.played_at DESC, m.created_at DESC`
+    );
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Failed to fetch matches", error);
+    return res.status(500).json({ message: "Failed to fetch matches" });
+  }
+});
+
 router.post("/", async (req, res) => {
   const mapId = toPositiveInteger(req.body?.mapId);
   const result = req.body?.result === undefined ? "draw" : req.body.result;
